@@ -1,1418 +1,1462 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="法院起诉素材智能体 - 智能法律辅助工具,帮助您快速生成规范的诉讼文书">
-  <meta name="keywords" content="法律文书,起诉状,诉讼材料,法律AI,智能辅助">
-  <meta name="author" content="Legal Agent">
-  <title>法院起诉素材智能体</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;500;600&display=swap">
-  <style>
-    :root {
-      --primary: #0f2a4f;
-      --primary-light: #1a3d6b;
-      --accent: #c9a45e;
-      --accent-light: #e6c87c;
-      --bg-light: #f8fafc;
-      --bg-white: #ffffff;
-      --text-primary: #1e293b;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --border: #e2e8f0;
-      --success: #22c55e;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-      --shadow: 0 4px 12px rgba(15, 42, 79, 0.1);
-      --shadow-lg: 0 8px 24px rgba(15, 42, 79, 0.15);
-      --radius: 8px;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-light);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ==================== 头部 ==================== */
-    header {
-      background: var(--primary);
-      color: white;
-      padding: 1rem 2rem;
-      box-shadow: var(--shadow);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .header-top {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--accent);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    /* 顶部进度条 - 4步骤 */
-    .top-tabs {
-      display: flex;
-      gap: 0;
-      justify-content: space-between;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .top-tab {
-      flex: 1;
-      text-align: center;
-      padding: 0.75rem 1rem;
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: rgba(255,255,255,0.7);
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.3s;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .top-tab:hover {
-      background: rgba(255,255,255,0.2);
-      color: white;
-    }
-
-    .top-tab.ttab-active {
-      background: var(--accent);
-      color: var(--primary);
-    }
-
-    .top-tab.ttab-done {
-      background: var(--success);
-      color: white;
-    }
-
-    .step-number {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .top-tab.ttab-active .step-number {
-      background: white;
-    }
-
-    .top-tab.ttab-done .step-number {
-      background: white;
-    }
-
-    /* ==================== 主布局 ==================== */
-    .main-layout {
-      max-width: 1400px;
-      margin: 2rem auto;
-      padding: 0 2rem;
-      display: flex;
-      gap: 2rem;
-      flex: 1;
-    }
-
-    /* 左侧边栏 */
-    .sidebar {
-      width: 280px;
-      flex-shrink: 0;
-    }
-
-    .case-drawer {
-      background: var(--bg-white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-    }
-
-    .drawer-header {
-      padding: 1rem;
-      background: var(--primary);
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .drawer-header h3 {
-      font-size: 0.95rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .drawer-content {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    #case-list-items {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .case-item {
-      padding: 0.875rem 1rem;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background 0.2s;
-      position: relative;
-    }
-
-    .case-item:hover {
-      background: var(--bg-light);
-    }
-
-    .case-item.active {
-      background: var(--primary-light);
-      color: white;
-    }
-
-    .case-item-name {
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-      font-size: 0.9rem;
-    }
-
-    .case-item-meta {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-
-    .case-item.active .case-item-meta {
-      color: rgba(255,255,255,0.7);
-    }
-
-    .case-item-del {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      background: rgba(239,68,68,0.2);
-      color: #ef4444;
-      border: none;
-      border-radius: 4px;
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .case-item.active .case-item-del {
-      background: rgba(255,255,255,0.2);
-      color: white;
-    }
-
-    /* 右侧内容区 */
-    .content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    /* 面板系统 */
-    .panel {
-      background: var(--bg-white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 2rem;
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .panel-header {
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .panel-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .panel-actions {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    /* ==================== 表单元素 ==================== */
-    .form-section-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 1.5rem 0 1rem 0;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-grid.span-2 {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-group.span-2 {
-      grid-column: span 2;
-    }
-
-    .form-group label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .form-group label .required {
-      color: #ef4444;
-      margin-left: 0.25rem;
-    }
-
-    .form-control {
-      padding: 0.625rem 0.875rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 0.875rem;
-      font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      width: 100%;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(15, 42, 79, 0.1);
-    }
-
-    textarea.form-control {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    /* 被告卡片 */
-    .defendant-card {
-      background: var(--bg-light);
-      padding: 1.25rem;
-      border-radius: var(--radius);
-      margin-bottom: 1rem;
-      border-left: 3px solid var(--accent);
-    }
-
-    .defendant-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .defendant-label {
-      font-weight: 600;
-      color: var(--primary);
-      font-size: 0.95rem;
-    }
-
-    /* ==================== 按钮 ==================== */
-    .btn {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .btn-ghost {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    .btn-ghost:hover {
-      background: rgba(255,255,255,0.2);
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: var(--primary);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-light);
-      transform: translateY(-1px);
-    }
-
-    .btn-sm {
-      padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
-    }
-
-    .btn-danger-soft {
-      background: rgba(239,68,68,0.1);
-      color: #ef4444;
-    }
-
-    .btn-danger-soft:hover {
-      background: rgba(239,68,68,0.2);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-    }
-
-    .btn-outline:hover {
-      background: var(--bg-light);
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    /* ==================== 分隔线 ==================== */
-    hr {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 1.5rem 0;
-    }
-
-    /* ==================== 文件上传 ==================== */
-    .upload-zone {
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .upload-zone:hover, .upload-zone.drag-over {
-      border-color: var(--primary-light);
-      background: var(--bg-light);
-    }
-
-    .upload-icon {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .file-item {
-      background: var(--bg-light);
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 0.875rem;
-    }
-
-    .file-icon {
-      font-size: 1.25rem;
-    }
-
-    .file-name {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .file-meta {
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-    }
-
-    .remove-btn {
-      background: none;
-      border: none;
-      color: #ef4444;
-      cursor: pointer;
-      font-size: 1rem;
-      padding: 0.25rem;
-      opacity: 0.6;
-    }
-
-    .remove-btn:hover {
-      opacity: 1;
-    }
-
-    /* ==================== 表格 ==================== */
-    .table-wrapper {
-      overflow-x: auto;
-      margin-top: 1rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.875rem;
-    }
-
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      border: 1px solid var(--border);
-    }
-
-    th {
-      background: var(--bg-light);
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    tr:hover td {
-      background: rgba(15, 42, 79, 0.03);
-    }
-
-    .ev-act-btn {
-      background: var(--bg-light);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      cursor: pointer;
-      padding: 0.25rem 0.5rem;
-      margin: 0 0.125rem;
-      opacity: 0.6;
-      transition: all 0.2s;
-    }
-
-    .ev-act-btn:hover:not(:disabled) {
-      opacity: 1;
-      background: var(--primary-light);
-      color: white;
-      border-color: var(--primary-light);
-    }
-
-    .ev-act-btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.3;
-    }
-
-    .ev-del-btn {
-      background: rgba(239,68,68,0.1);
-      color: #ef4444;
-    }
-
-    .ev-del-btn:hover:not(:disabled) {
-      background: #ef4444;
-      color: white;
-    }
-
-    .page-range-badge {
-      display: inline-block;
-      padding: 0.125rem 0.5rem;
-      background: #dbeafe;
-      color: #1e40af;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    /* ==================== 弹窗 ==================== */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.open {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--bg-white);
-      border-radius: var(--radius);
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      padding: 1.5rem;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-header h3 {
-      font-size: 1.25rem;
-      color: var(--primary);
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--text-secondary);
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-
-    .modal-close:hover {
-      background: var(--bg-light);
-    }
-
-    /* ==================== 侧边抽屉 ==================== */
-    #case-drawer {
-      position: fixed;
-      left: -320px;
-      top: 0;
-      bottom: 0;
-      width: 320px;
-      background: var(--bg-white);
-      box-shadow: var(--shadow-lg);
-      z-index: 1000;
-      transition: left 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #case-drawer.open {
-      left: 0;
-    }
-
-    #case-drawer-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 999;
-    }
-
-    #case-drawer.open ~ #case-drawer-overlay {
-      display: block;
-    }
-
-    .drawer-top {
-      padding: 1.5rem;
-      background: var(--primary);
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .drawer-body {
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .close-drawer {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    /* ==================== Toast 提示 ==================== */
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: var(--primary);
-      color: white;
-      padding: 0.75rem 1.25rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease;
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-    }
-
-    .toast.toast-show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .toast-success {
-      background: var(--success);
-    }
-
-    .toast-warn {
-      background: #f59e0b;
-    }
-
-    /* ==================== 预览区 ==================== */
-    .preview-card {
-      background: var(--bg-light);
-      border-radius: var(--radius);
-      padding: 2rem;
-      margin-top: 1.5rem;
-    }
-
-    .preview-area {
-      background: white;
-      padding: 2rem;
-      border-radius: var(--radius);
-      font-family: 'Noto Serif SC', serif;
-      line-height: 2.2;
-      font-size: 0.95rem;
-      white-space: pre-wrap;
-      position: relative;
-    }
-
-    .watermark {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-45deg);
-      font-size: 3rem;
-      color: rgba(0,0,0,0.05);
-      font-weight: bold;
-      pointer-events: none;
-    }
-
-    /* ==================== 搜索与分析 ==================== */
-    .search-form {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-      padding: 1.25rem;
-      background: var(--bg-light);
-      border-radius: var(--radius);
-    }
-
-    .search-form .form-group {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .case-card {
-      background: var(--bg-light);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      border-left: 3px solid var(--accent);
-    }
-
-    .case-title {
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 0.5rem;
-      font-size: 1rem;
-    }
-
-    .case-meta {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .case-summary {
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: var(--text-primary);
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .tag-win {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .tag-lose {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .tag-settle {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-bar {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-secondary);
-    }
-
-    .status-bar.loading {
-      color: var(--primary);
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(15, 42, 79, 0.1);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      margin-right: 0.5rem;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .analysis-summary {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: var(--radius);
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      font-size: 0.95rem;
-      color: var(--primary);
-    }
-
-    .strategy-box {
-      background: var(--bg-light);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      font-size: 0.95rem;
-      line-height: 1.8;
-    }
-
-    /* ==================== 隐藏/显示 ==================== */
-    .hidden {
-      display: none !important;
-    }
-
-    /* ==================== 响应式 ==================== */
-    @media (max-width: 1024px) {
-      .main-layout {
-        flex-direction: column;
-        padding: 1rem;
-      }
-
-      .sidebar {
-        width: 100%;
-      }
-
-      .top-tabs {
-        font-size: 0.8rem;
-      }
-
-      .top-tab {
-        padding: 0.6rem 0.5rem;
-      }
-    }
-
-    @media (max-width: 768px) {
-      header {
-        padding: 1rem;
-      }
-
-      .header-top {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .form-grid.span-2 {
-        grid-template-columns: 1fr;
-      }
-
-      .form-group.span-2 {
-        grid-column: auto;
-      }
-    }
-
-    /* ==================== 打印 ==================== */
-    @media print {
-      header,
-      .sidebar,
-      .btn,
-      #case-drawer,
-      .modal,
-      .toast {
-        display: none !important;
-      }
-
-      .panel {
-        box-shadow: none;
-        padding: 0;
-      }
-
-      .preview-area {
-        box-shadow: none;
-        padding: 0;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老肖说法 - 您的智能法律助手</title>
+    <!-- 使用 Noto Sans SC 商用免费字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1890ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --error-color: #f5222d;
+            --text-primary: #262626;
+            --text-secondary: #595959;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --border-color: #e8e8e8;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.5rem;
+            cursor: pointer;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-menu a:hover {
+            opacity: 0.8;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* 主页区域 */
+        .home-page {
+            display: block;
+        }
+
+        .home-page.hidden {
+            display: none;
+        }
+
+        /* 英雄区域 */
+        .hero {
+            background: white;
+            border-radius: 12px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* 操作按钮组 */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.2rem;
+            padding: 1.2rem 2.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* 个人信息卡片 */
+        .profile-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            font-size: 1.5rem;
+        }
+
+        .douyin-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fe2c55;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .douyin-link:hover {
+            opacity: 0.8;
+        }
+
+        /* 近况展示 */
+        .recent-news {
+            margin-top: 1rem;
+        }
+
+        .news-item {
+            padding: 1rem;
+            background: var(--bg-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .news-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-content {
+            color: var(--text-primary);
+        }
+
+        /* 起诉流程页面 */
+        .litigation-page {
+            display: none;
+        }
+
+        .litigation-page.active {
+            display: block;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .progress-step.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .progress-step.completed {
+            color: var(--success-color);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .progress-step.active .step-number {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* 面板容器 */
+        .panel {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: white;
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-color);
+            border-color: var(--text-secondary);
+        }
+
+        /* 案件检索页面 */
+        .search-page {
+            display: none;
+        }
+
+        .search-page.active {
+            display: block;
+        }
+
+        /* 智能引导区域 */
+        .guide-section {
+            margin-bottom: 2rem;
+        }
+
+        .guide-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .guide-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .guide-icon {
+            font-size: 2rem;
+        }
+
+        .guide-title {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .guide-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* 问题引导 */
+        .question-group {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-color);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .question-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary-color);
+            background: #f0f8ff;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary-color);
+            background: #e6f7ff;
+        }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        .option-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+
+        /* 搜索结果 */
+        .search-results {
+            margin-top: 2rem;
+        }
+
+        .result-count {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .case-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .case-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .case-item:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .case-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .case-meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-color);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-left: 4px solid var(--success-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .profile-section {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .nav-menu {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="header-top">
-      <div class="logo">
-        <div class="logo-icon">⚖️</div>
-        <span>法院起诉素材智能体</span>
-      </div>
-      <div class="header-actions">
-        <button class="btn btn-ghost" onclick="showAiModal()">✨ AI 辅助</button>
-        <button class="btn btn-primary" onclick="newCase()">+ 新建案件</button>
-      </div>
-    </div>
-
-    <!-- 顶部 4 步骤导航 -->
-    <div class="top-tabs">
-      <button class="top-tab ttab-active" id="ttab-1" onclick="switchPanel('panel-complaint')">
-        <span class="step-number">1</span>
-        <span>起诉状生成</span>
-      </button>
-      <button class="top-tab" id="ttab-2" onclick="switchPanel('panel-identity')">
-        <span class="step-number">2</span>
-        <span>身份信息</span>
-      </button>
-      <button class="top-tab" id="ttab-3" onclick="switchPanel('panel-evidence')">
-        <span class="step-number">3</span>
-        <span>证据清单</span>
-      </button>
-      <button class="top-tab" id="ttab-4" onclick="switchPanel('panel-analysis')">
-        <span class="step-number">4</span>
-        <span>案件检索</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- 案件抽屉 -->
-  <div id="case-drawer">
-    <div class="drawer-top">
-      <h3>📁 我的案件</h3>
-      <button class="close-drawer" onclick="closeCaseDrawer()">×</button>
-    </div>
-    <div class="drawer-body">
-      <button class="btn btn-primary" style="width:100%;margin:1rem" onclick="newCase()">+ 新建案件</button>
-      <div id="case-list-items"></div>
-    </div>
-  </div>
-  <div id="case-drawer-overlay" onclick="closeCaseDrawer()"></div>
-
-  <div class="main-layout">
-    <!-- 左侧边栏(简化版) -->
-    <aside class="sidebar">
-      <div class="case-drawer">
-        <div class="drawer-header">
-          <h3>📁 当前案件</h3>
-          <button class="btn btn-ghost btn-sm" onclick="openCaseDrawer()">📋 更多</button>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo" onclick="showHome()">老肖说法</div>
+            <nav class="nav-menu">
+                <a href="#" onclick="showHome()">首页</a>
+                <a href="#" onclick="showSearch()">案件检索</a>
+                <a href="#">关于我们</a>
+            </nav>
         </div>
-        <div id="current-case-display" style="padding: 1rem;">
-          <p style="color: var(--text-secondary); font-size: 0.875rem;">加载中...</p>
-        </div>
-      </div>
-    </aside>
+    </header>
 
-    <!-- 主内容区 -->
-    <main class="content">
-      <!-- 面板 1: 起诉状生成 -->
-      <div id="panel-complaint" class="panel active">
-        <div class="panel-header">
-          <h2 class="panel-title">📝 起诉状生成</h2>
-          <div class="panel-actions">
-            <button class="btn btn-outline" onclick="clearForm()">清空</button>
-          </div>
-        </div>
-
-        <!-- 原告信息 -->
-        <h3 class="form-section-title">原告信息</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>原告类型</label>
-            <select class="form-control" id="p_type" onchange="toggleFields('p')">
-              <option value="natural">自然人</option>
-              <option value="company">法人或其他组织</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>姓名/名称 <span class="required">*</span></label>
-            <input type="text" class="form-control" id="p_name" placeholder="请输入原告姓名或名称">
-          </div>
-          <div class="form-group" id="p_id_group">
-            <label>身份证号码</label>
-            <input type="text" class="form-control" id="p_id" placeholder="如知道请填写">
-          </div>
-          <div class="form-group">
-            <label>联系电话</label>
-            <input type="text" class="form-control" id="p_phone" placeholder="">
-          </div>
-          <div class="form-group span-2">
-            <label>住所地/经营场所 <span class="required">*</span></label>
-            <input type="text" class="form-control" id="p_address" placeholder="详细地址">
-          </div>
-          <div class="form-group" id="p_legal_group" style="display:none">
-            <label>法定代表人</label>
-            <input type="text" class="form-control" id="p_legal" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>委托代理人</label>
-            <input type="text" class="form-control" id="p_agent" placeholder="律师或代理人姓名">
-          </div>
-          <div class="form-group">
-            <label>代理人电话</label>
-            <input type="text" class="form-control" id="p_agent_phone" placeholder="">
-          </div>
-        </div>
-
-        <hr>
-
-        <!-- 被告信息 -->
-        <h3 class="form-section-title">被告信息</h3>
-        <div id="defendants-container"></div>
-        <button class="btn btn-outline" onclick="addDefendant()" style="margin-top: 0.5rem;">+ 添加被告</button>
-
-        <hr>
-
-        <!-- 案件信息 -->
-        <h3 class="form-section-title">案件信息</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>管辖法院 <span class="required">*</span></label>
-            <input type="text" class="form-control" id="court" placeholder="请输入法院全称">
-          </div>
-          <div class="form-group">
-            <label>案由 <span class="required">*</span></label>
-            <select class="form-control" id="cause" onchange="document.getElementById('cause_custom_group').style.display=this.value==='自定义'?'':'none'">
-              <option value="">请选择案由</option>
-              <option value="民间借贷纠纷">民间借贷纠纷</option>
-              <option value="买卖合同纠纷">买卖合同纠纷</option>
-              <option value="劳动合同纠纷">劳动合同纠纷</option>
-              <option value="离婚纠纷">离婚纠纷</option>
-              <option value="房屋租赁纠纷">房屋租赁纠纷</option>
-              <option value="交通事故责任纠纷">交通事故责任纠纷</option>
-              <option value="医疗损害责任纠纷">医疗损害责任纠纷</option>
-              <option value="人格权纠纷">人格权纠纷</option>
-              <option value="不当得利纠纷">不当得利纠纷</option>
-              <option value="侵权责任纠纷">侵权责任纠纷</option>
-              <option value="知识产权合同纠纷">知识产权合同纠纷</option>
-              <option value="物业服务合同纠纷">物业服务合同纠纷</option>
-              <option value="其他合同纠纷">其他合同纠纷</option>
-              <option value="自定义">自定义</option>
-            </select>
-          </div>
-          <div class="form-group" id="cause_custom_group" style="display:none">
-            <label>自定义案由</label>
-            <input type="text" class="form-control" id="cause_custom" placeholder="请输入案由">
-          </div>
-          <div class="form-group">
-            <label>涉案金额(元)</label>
-            <input type="number" class="form-control" id="amount" placeholder="0.00">
-          </div>
-          <div class="form-group">
-            <label>纠纷发生日期</label>
-            <input type="date" class="form-control" id="dispute_date">
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-top: 1rem;">
-          <label>诉讼请求 <span class="required">*</span></label>
-          <textarea class="form-control" id="claims" rows="6" placeholder="请详细列明诉讼请求,每项单独一行..."></textarea>
-        </div>
-
-        <div class="form-group" style="margin-top: 1rem;">
-          <label>事实与理由 <span class="required">*</span></label>
-          <textarea class="form-control" id="facts" rows="10" placeholder="请详细陈述案件事实、经过、法律依据等..."></textarea>
-        </div>
-
-        <div class="btn-group" style="margin-top: 1.5rem;">
-          <button class="btn btn-primary" onclick="generateComplaint()">生成起诉状</button>
-          <button class="btn btn-outline" onclick="nextStep(2)">下一步: 身份信息 →</button>
-        </div>
-
-        <!-- 起诉状预览 -->
-        <div id="complaint-preview-card" class="preview-card hidden">
-          <div class="panel-header" style="border:none;padding-bottom:0">
-            <h3 style="color:var(--primary)">📄 起诉状预览</h3>
-            <div class="btn-group">
-              <button class="btn btn-outline btn-sm" onclick="printComplaint()">🖨️ 打印</button>
-              <button class="btn btn-outline btn-sm" onclick="copyComplaint()">📋 复制</button>
+    <div class="container">
+        <!-- 主页 -->
+        <div class="home-page" id="homePage">
+            <!-- 英雄区域 -->
+            <div class="hero">
+                <h1>专业法律咨询，智能诉讼辅助</h1>
+                <p>为您提供专业的法律建议，智能生成起诉状，高效管理诉讼证据</p>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="startLitigation()">
+                        📝 我要起诉
+                    </button>
+                    <button class="btn btn-secondary" onclick="showSearch()">
+                        🔍 案件检索
+                    </button>
+                </div>
             </div>
-          </div>
-          <div class="preview-area" id="complaint-preview"></div>
-        </div>
-      </div>
 
-      <!-- 面板 2: 身份信息 -->
-      <div id="panel-identity" class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">📋 身份信息文件</h2>
-          <div class="panel-actions">
-            <button class="btn btn-primary" onclick="syncFromStep1('p')">同步原告信息</button>
-          </div>
-        </div>
+            <!-- 个人信息 + 近况 -->
+            <div class="profile-section">
+                <div class="card">
+                    <h2>👋 关于老肖</h2>
+                    <ul class="info-list">
+                        <li>
+                            <span class="info-icon">⚖️</span>
+                            <span>资深法律顾问，专注民事、商事案件</span>
+                        </li>
+                        <li>
+                            <span class="info-icon">📱</span>
+                            <a href="#" class="douyin-link">
+                                🎵 抖音号: 老肖说法 (每日法律知识分享)
+                            </a>
+                        </li>
+                        <li>
+                            <span class="info-icon">💼</span>
+                            <span>从业 15 年，协助数千起案件</span>
+                        </li>
+                        <li>
+                            <span class="info-icon">🎯</span>
+                            <span>专注合同纠纷、劳动争议、侵权责任</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="recent-news">
+                        <h3>📰 近期动态</h3>
+                        <div class="news-item">
+                            <div class="news-date">2026-03-25</div>
+                            <div class="news-content">发布《劳动合同法实务指南》抖音视频，播放量突破 10 万+</div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-date">2026-03-20</div>
+                            <div class="news-content">成功协助 5 起劳动争议案件胜诉，挽回经济损失 50 余万元</div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-date">2026-03-15</div>
+                            <div class="news-content">推出"老肖说法"智能法律助手，为用户提供免费法律咨询</div>
+                        </div>
+                    </div>
+                </div>
 
-        <h3 class="form-section-title">原告身份信息</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>姓名/名称</label>
-            <input type="text" class="form-control" id="id_p_name" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>证件类型</label>
-            <select class="form-control" id="id_p_type">
-              <option value="身份证">身份证</option>
-              <option value="营业执照">营业执照</option>
-              <option value="统一社会信用代码证书">统一社会信用代码证书</option>
-              <option value="组织机构代码证">组织机构代码证</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>证件号码</label>
-            <input type="text" class="form-control" id="id_p_number" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>出生日期</label>
-            <input type="text" class="form-control" id="id_p_birth" placeholder="例:1980-01-01">
-          </div>
-          <div class="form-group span-2">
-            <label>住所地址</label>
-            <input type="text" class="form-control" id="id_p_addr" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>民族</label>
-            <input type="text" class="form-control" id="id_p_nation" placeholder="例:汉族">
-          </div>
-          <div class="form-group">
-            <label>联系方式</label>
-            <input type="text" class="form-control" id="id_p_tel" placeholder="">
-          </div>
-        </div>
-
-        <div class="upload-zone" id="upload-p" ondragover="dragOver(event,'upload-p')" ondragleave="dragLeave('upload-p')" ondrop="handleDrop(event,'p')">
-          <div class="upload-icon">📎</div>
-          <div>点击或拖拽上传原告证件图片</div>
-          <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem">支持 JPG、PNG、PDF</div>
-          <input type="file" id="file-p" multiple accept=".jpg,.jpeg,.png,.pdf" style="display:none" onchange="handleFileSelect(event,'p')">
-        </div>
-        <button class="btn btn-outline" style="margin-top:0.5rem" onclick="document.getElementById('file-p').click()">选择文件</button>
-        <div class="file-list" id="file-list-p"></div>
-
-        <hr>
-
-        <h3 class="form-section-title">被告身份信息</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>姓名/名称</label>
-            <input type="text" class="form-control" id="id_d_name" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>证件类型</label>
-            <select class="form-control" id="id_d_type">
-              <option value="身份证">身份证</option>
-              <option value="营业执照">营业执照</option>
-              <option value="统一社会信用代码证书">统一社会信用代码证书</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>证件号码</label>
-            <input type="text" class="form-control" id="id_d_number" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>出生日期</label>
-            <input type="text" class="form-control" id="id_d_birth" placeholder="例:1980-01-01">
-          </div>
-          <div class="form-group span-2">
-            <label>住所地址</label>
-            <input type="text" class="form-control" id="id_d_addr" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>民族</label>
-            <input type="text" class="form-control" id="id_d_nation" placeholder="例:汉族">
-          </div>
-          <div class="form-group">
-            <label>联系方式</label>
-            <input type="text" class="form-control" id="id_d_tel" placeholder="">
-          </div>
-        </div>
-
-        <div class="upload-zone" id="upload-d" ondragover="dragOver(event,'upload-d')" ondragleave="dragLeave('upload-d')" ondrop="handleDrop(event,'d')">
-          <div class="upload-icon">📎</div>
-          <div>点击或拖拽上传被告证件图片</div>
-          <input type="file" id="file-d" multiple accept=".jpg,.jpeg,.png,.pdf" style="display:none" onchange="handleFileSelect(event,'d')">
-        </div>
-        <button class="btn btn-outline" style="margin-top:0.5rem" onclick="document.getElementById('file-d').click()">选择文件</button>
-        <div class="file-list" id="file-list-d"></div>
-
-        <div class="btn-group" style="margin-top: 1.5rem;">
-          <button class="btn btn-primary" onclick="generateIdDoc()">生成身份信息确认书</button>
-          <button class="btn btn-outline" onclick="printIdDoc()">🖨️ 打印</button>
-          <button class="btn btn-outline" onclick="nextStep(3)">下一步: 证据清单 →</button>
-        </div>
-
-        <div class="preview-card">
-          <h3 style="color:var(--primary);margin-bottom:1rem">📄 身份信息确认书预览</h3>
-          <div class="preview-area" id="id-doc-preview">请填写信息后生成</div>
-        </div>
-      </div>
-
-      <!-- 面板 3: 证据清单 -->
-      <div id="panel-evidence" class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">📂 证据清单</h2>
-          <div class="panel-actions">
-            <button class="btn btn-primary" onclick="exportExcel()">📊 导出 Excel</button>
-            <button class="btn btn-outline" onclick="exportEvidencePDF()">🖨️ 打印</button>
-          </div>
-        </div>
-
-        <div class="upload-zone" id="upload-ev" ondragover="dragOver(event,'upload-ev')" ondragleave="dragLeave('upload-ev')" ondrop="handleEvDrop(event)">
-          <div class="upload-icon">📎</div>
-          <div>点击或拖拽上传证据文件</div>
-          <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem">支持 PDF、JPG、PNG、DOCX、XLSX</div>
-          <input type="file" id="file-ev" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.doc,.xlsx,.xls" style="display:none" onchange="handleEvSelect(event)">
-        </div>
-        <button class="btn btn-outline" style="margin-top:0.5rem" onclick="document.getElementById('file-ev').click()">选择文件</button>
-
-        <div id="ev-page-total" style="margin-top:0.5rem;color:var(--text-secondary);font-size:0.875rem"></div>
-
-        <div class="file-list" id="ev-upload-list"></div>
-
-        <hr>
-
-        <h3 class="form-section-title">证据列表</h3>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:40px;text-align:center">序号</th>
-                <th>证据名称</th>
-                <th style="width:72px">类型</th>
-                <th style="width:52px;text-align:center">页数</th>
-                <th style="width:88px;text-align:center">页码</th>
-                <th style="width:44px;text-align:center">份数</th>
-                <th style="width:88px">原件/复印件</th>
-                <th>证明目的</th>
-                <th style="width:64px">备注</th>
-                <th style="width:100px;text-align:center">操作</th>
-              </tr>
-            </thead>
-            <tbody id="evidence-tbody">
-              <tr><td colspan="10" style="text-align:center;color:var(--text-secondary);padding:2rem 0">暂无证据 — 请上传文件或手动添加</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <button class="btn btn-outline" style="margin-top:1rem" onclick="addEvidenceRowManual()">+ 手动添加证据</button>
-
-        <div class="btn-group" style="margin-top: 1.5rem;">
-          <button class="btn btn-primary" onclick="nextStep(4)">下一步: 案件检索 →</button>
-        </div>
-      </div>
-
-      <!-- 面板 4: 案件检索 -->
-      <div id="panel-analysis" class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">🔍 案件检索与分析</h2>
-        </div>
-
-        <div class="search-form">
-          <div class="form-group">
-            <label>案由关键词</label>
-            <input type="text" class="form-control" id="search_cause" placeholder="例:民间借贷纠纷">
-          </div>
-          <div class="form-group">
-            <label>法院</label>
-            <input type="text" class="form-control" id="search_court" placeholder="例:北京市朝阳区人民法院">
-          </div>
-          <div class="form-group">
-            <label>年份</label>
-            <select class="form-control" id="search_year">
-              <option value="">全部年份</option>
-              <option value="2024">2024年</option>
-              <option value="2023">2023年</option>
-              <option value="2022">2022年</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>&nbsp;</label>
-            <button class="btn btn-primary" style="margin-top:0" onclick="searchCases()">开始检索</button>
-          </div>
-        </div>
-
-        <button class="btn btn-outline" style="margin-bottom:1rem" onclick="autoFillSearch()">📋 自动填写(来自第一步)</button>
-
-        <div id="search-results" style="display:none">
-          <div class="analysis-summary" id="analysis-summary"></div>
-
-          <div class="case-card">
-            <h3 style="margin-bottom:1rem">统计摘要</h3>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>检索到案例</label>
-                <div style="font-size:1.5rem;font-weight:600;color:var(--primary)" id="result-count">0</div>
-              </div>
-              <div class="form-group">
-                <label>原告胜诉</label>
-                <div style="font-size:1.5rem;font-weight:600;color:var(--success)" id="stat-win">0</div>
-              </div>
-              <div class="form-group">
-                <label>原告败诉</label>
-                <div style="font-size:1.5rem;font-weight:600;color:#ef4444" id="stat-lose">0</div>
-              </div>
-              <div class="form-group">
-                <label>调解/撤诉</label>
-                <div style="font-size:1.5rem;font-weight:600;color:#f59e0b" id="stat-settle">0</div>
-              </div>
-              <div class="form-group">
-                <label>胜诉率</label>
-                <div style="font-size:1.5rem;font-weight:600;color:var(--primary)" id="stat-rate">0%</div>
-              </div>
+                <div class="card">
+                    <h2>📊 服务数据</h2>
+                    <ul class="info-list">
+                        <li>
+                            <span class="info-icon">✅</span>
+                            <span>案件胜诉率: 85%+</span>
+                        </li>
+                        <li>
+                            <span class="info-icon">👥</span>
+                            <span>服务客户: 2000+</span>
+                        </li>
+                        <li>
+                            <span class="info-icon">📈</span>
+                            <span>年度处理案件: 300+</span>
+                        </li>
+                        <li>
+                            <span class="info-icon">⏰</span>
+                            <span>平均响应时间: 2 小时</span>
+                        </li>
+                        <li>
+                            <span class="info-icon">💰</span>
+                            <span>挽回损失: 1000 万+</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-          </div>
+        </div>
 
-          <h3 style="margin:1.5rem 0 1rem 0">案例列表</h3>
-          <div id="case-list"></div>
+        <!-- 案件检索页面 -->
+        <div class="search-page" id="searchPage">
+            <button class="back-btn" onclick="showHome()">
+                ← 返回首页
+            </button>
 
-          <div class="strategy-box">
-            <h3 style="margin-bottom:1rem">⚖️ 诉讼策略建议</h3>
-            <div id="strategy-advice"></div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
+            <!-- 智能引导区域 -->
+            <div class="guide-section" id="guideSection">
+                <div class="guide-card">
+                    <div class="guide-header">
+                        <span class="guide-icon">🤖</span>
+                        <div>
+                            <div class="guide-title">智能案情引导</div>
+                            <div class="guide-subtitle">请选择您的案件类型,系统将引导您完善关键信息</div>
+                        </div>
+                    </div>
 
-  <!-- AI 辅助弹窗 -->
-  <div class="modal" id="ai-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>✨ AI 智能辅助填写</h3>
-        <button class="modal-close" onclick="closeAiModal()">×</button>
-      </div>
-      <div class="form-group">
-        <label>案情描述</label>
-        <textarea class="form-control" id="ai-input" rows="5" placeholder="请简要描述案情,例如: 张三于2024年1月向李四借款5万元,约定3个月内归还,但至今未还..."></textarea>
-      </div>
-      <div class="btn-group" style="margin-top: 1rem; justify-content: flex-end;">
-        <button class="btn btn-outline" onclick="closeAiModal()">取消</button>
-        <button class="btn btn-primary" id="ai-btn" onclick="aiAssist()">开始分析</button>
-      </div>
-      <div id="ai-result-area" style="margin-top: 1.5rem; display: none;">
-        <h4 style="margin-bottom: 0.75rem;">分析结果</h4>
-        <div class="form-group">
-          <label>案由</label>
-          <input type="text" class="form-control" id="ai-result-cause" readonly>
+                    <div class="form-group">
+                        <label class="form-label">选择案件类型</label>
+                        <select class="form-select" id="caseTypeSelect" onchange="handleCaseTypeChange()">
+                            <option value="">请选择案件类型</option>
+                            <option value="loan">借款纠纷</option>
+                            <option value="labor">劳动争议</option>
+                            <option value="contract">合同纠纷</option>
+                            <option value="tort">侵权责任纠纷</option>
+                            <option value="lease">房屋租赁纠纷</option>
+                        </select>
+                    </div>
+
+                    <!-- 动态问题区域 -->
+                    <div id="dynamicQuestions"></div>
+                </div>
+            </div>
+
+            <!-- 搜索结果 -->
+            <div class="search-results" id="searchResults" style="display: none;">
+                <div class="card">
+                    <div class="panel-header">
+                        <h2 class="panel-title">🔍 搜索结果</h2>
+                        <div class="panel-actions">
+                            <button class="btn btn-secondary" onclick="resetSearch()">重新搜索</button>
+                        </div>
+                    </div>
+                    
+                    <div class="result-count" id="resultCount"></div>
+                    <div class="case-list" id="caseList"></div>
+                </div>
+            </div>
         </div>
-        <div class="form-group" style="margin-top: 0.75rem;">
-          <label>诉讼请求</label>
-          <textarea class="form-control" id="ai-result-claims" rows="5" readonly></textarea>
+
+        <!-- 起诉流程页面 -->
+        <div class="litigation-page" id="litigationPage">
+            <button class="back-btn" onclick="showHome()">
+                ← 返回首页
+            </button>
+
+            <!-- 进度条 -->
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span>起诉状生成</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span>身份信息</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span>证据清单</span>
+                </div>
+            </div>
+
+            <!-- 面板 1: 起诉状生成 -->
+            <div class="panel active" id="panel1">
+                <div class="panel-header">
+                    <h2 class="panel-title">📝 起诉状生成</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" onclick="saveComplaint()">保存</button>
+                        <button class="btn btn-primary" onclick="generateComplaint()">生成起诉状</button>
+                    </div>
+                </div>
+
+                <form id="complaintForm">
+                    <div class="form-group">
+                        <label class="form-label">案件类型</label>
+                        <select class="form-select" id="complaintCaseType">
+                            <option value="">请选择案件类型</option>
+                            <option value="劳动合同纠纷">劳动合同纠纷</option>
+                            <option value="买卖合同纠纷">买卖合同纠纷</option>
+                            <option value="民间借贷纠纷">民间借贷纠纷</option>
+                            <option value="侵权责任纠纷">侵权责任纠纷</option>
+                            <option value="房屋租赁合同纠纷">房屋租赁合同纠纷</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">原告姓名</label>
+                            <input type="text" class="form-input" id="plaintiffName" placeholder="请输入原告姓名">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">原告身份证号</label>
+                            <input type="text" class="form-input" id="plaintiffId" placeholder="请输入身份证号">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">联系电话</label>
+                            <input type="text" class="form-input" id="phone" placeholder="请输入联系电话">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">联系地址</label>
+                            <input type="text" class="form-input" id="address" placeholder="请输入地址">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">被告姓名/名称</label>
+                        <input type="text" class="form-input" id="defendantName" placeholder="请输入被告姓名或公司名称">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">诉讼请求</label>
+                        <textarea class="form-textarea" id="claims" placeholder="请详细描述您的诉讼请求，如：要求被告支付工资人民币xx元..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">事实与理由</label>
+                        <textarea class="form-textarea" id="facts" placeholder="请详细描述案件的事实经过和法律依据..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 面板 2: 身份信息 -->
+            <div class="panel" id="panel2">
+                <div class="panel-header">
+                    <h2 class="panel-title">👤 身份信息管理</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" onclick="saveIdentity()">保存</button>
+                        <button class="btn btn-primary" onclick="generateIdentityDoc()">生成身份确认书</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">上传身份证照片</label>
+                    <input type="file" class="form-input" id="idCardFile" accept="image/*">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">姓名</label>
+                        <input type="text" class="form-input" id="identityName" placeholder="请输入姓名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">性别</label>
+                        <select class="form-select" id="gender">
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">民族</label>
+                        <input type="text" class="form-input" id="nation" placeholder="请输入民族">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">出生日期</label>
+                        <input type="date" class="form-input" id="birthDate">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">住址</label>
+                    <input type="text" class="form-input" id="residence" placeholder="请输入住址">
+                </div>
+            </div>
+
+            <!-- 面板 3: 证据清单 -->
+            <div class="panel" id="panel3">
+                <div class="panel-header">
+                    <h2 class="panel-title">📂 证据清单管理</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" onclick="exportExcel()">导出Excel</button>
+                        <button class="btn btn-primary" onclick="printEvidenceList()">打印清单</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">上传证据文件</label>
+                    <input type="file" class="form-input" id="evidenceFiles" multiple accept="image/*,.pdf,.doc,.docx">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">证据列表</label>
+                    <div id="evidenceList" class="case-list">
+                        <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                            暂无证据，请上传证据文件
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="form-group" style="margin-top: 0.75rem;">
-          <label>事实与理由</label>
-          <textarea class="form-control" id="ai-result-facts" rows="8" readonly></textarea>
-        </div>
-        <div class="btn-group" style="margin-top: 1rem;">
-          <button class="btn btn-outline" onclick="closeAiModal()">取消</button>
-          <button class="btn btn-primary" id="apply-ai-btn" onclick="applyAiResult()" style="display:none">应用内容</button>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script src="app.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // 显示主页
+        function showHome() {
+            document.getElementById('homePage').classList.remove('hidden');
+            document.getElementById('searchPage').classList.remove('active');
+            document.getElementById('litigationPage').classList.remove('active');
+        }
+
+        // 显示案件检索页面
+        function showSearch() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('searchPage').classList.add('active');
+            document.getElementById('litigationPage').classList.remove('active');
+        }
+
+        // 开始起诉流程
+        function startLitigation() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('searchPage').classList.remove('active');
+            document.getElementById('litigationPage').classList.add('active');
+            showPanel(1);
+        }
+
+        // 案件类型改变处理
+        function handleCaseTypeChange() {
+            const caseType = document.getElementById('caseTypeSelect').value;
+            const dynamicQuestions = document.getElementById('dynamicQuestions');
+            
+            if (!caseType) {
+                dynamicQuestions.innerHTML = '';
+                return;
+            }
+
+            // 根据案件类型加载不同的问题
+            let questionsHtml = '';
+            
+            if (caseType === 'loan') {
+                questionsHtml = `
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">1</span>
+                            请选择打款方式
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="paymentMethod" value="transfer" class="option-radio">
+                                <div class="option-text">
+                                    银行转账
+                                    <div class="option-hint">通过银行账户直接转账</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="paymentMethod" value="cash" class="option-radio">
+                                <div class="option-text">
+                                    现金支付
+                                    <div class="option-hint">当面以现金形式交付</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="paymentMethod" value="wechat" class="option-radio">
+                                <div class="option-text">
+                                    微信转账
+                                    <div class="option-hint">通过微信支付转账</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="paymentMethod" value="alipay" class="option-radio">
+                                <div class="option-text">
+                                    支付宝转账
+                                    <div class="option-hint">通过支付宝转账</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">2</span>
+                            是否有借条或其他书面凭证
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="hasNote" value="yes" class="option-radio">
+                                <div class="option-text">
+                                    有借条
+                                    <div class="option-hint">有对方签字的书面借条</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="hasNote" value="no" class="option-radio">
+                                <div class="option-text">
+                                    没有借条
+                                    <div class="option-hint">只有口头约定或其他证据</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">3</span>
+                            借款时间
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">借款日期</label>
+                                <input type="date" class="form-input" id="loanDate">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">约定还款日期</label>
+                                <input type="date" class="form-input" id="repayDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">4</span>
+                            借款金额
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">借款金额(元)</label>
+                            <input type="number" class="form-input" id="loanAmount" placeholder="请输入借款金额">
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">5</span>
+                            利息约定
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="interest" value="yes" class="option-radio">
+                                <div class="option-text">
+                                    有利息约定
+                                    <div class="option-hint">约定了具体的利息或利息计算方式</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="interest" value="no" class="option-radio">
+                                <div class="option-text">
+                                    无利息约定
+                                    <div class="option-hint">借款时未约定利息</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (caseType === 'labor') {
+                questionsHtml = `
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">1</span>
+                            争议类型
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="laborType" value="unpaid" class="option-radio">
+                                <div class="option-text">
+                                    拖欠工资
+                                    <div class="option-hint">公司未按时支付工资</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="laborType" value="overtime" class="option-radio">
+                                <div class="option-text">
+                                    加班费
+                                    <div class="option-hint">公司未支付加班费</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="laborType" value="illegal" class="option-radio">
+                                <div class="option-text">
+                                    违法解除
+                                    <div class="option-hint">公司违法解除劳动合同</div>
+                                </div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="laborType" value="other" class="option-radio">
+                                <div class="option-text">
+                                    其他
+                                    <div class="option-hint">其他劳动争议</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">2</span>
+                            入职时间
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">入职日期</label>
+                                <input type="date" class="form-input" id="startDate">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">离职日期</label>
+                                <input type="date" class="form-input" id="endDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">3</span>
+                            涉及金额
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">涉及金额(元)</label>
+                            <input type="number" class="form-input" id="laborAmount" placeholder="请输入涉及金额">
+                        </div>
+                    </div>
+                `;
+            } else if (caseType === 'contract') {
+                questionsHtml = `
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">1</span>
+                            合同类型
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="contractType" value="sale" class="option-radio">
+                                <div class="option-text">买卖合同</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="contractType" value="service" class="option-radio">
+                                <div class="option-text">服务合同</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="contractType" value="lease" class="option-radio">
+                                <div class="option-text">租赁合同</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="contractType" value="other" class="option-radio">
+                                <div class="option-text">其他</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">2</span>
+                            违约情况
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="breach" value="payment" class="option-radio">
+                                <div class="option-text">未付款/拖欠款项</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="breach" value="delivery" class="option-radio">
+                                <div class="option-text">未交付货物/未提供服务</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="breach" value="quality" class="option-radio">
+                                <div class="option-text">质量不符合约定</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="breach" value="other" class="option-radio">
+                                <div class="option-text">其他违约行为</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">3</span>
+                            涉及金额
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">合同金额(元)</label>
+                            <input type="number" class="form-input" id="contractAmount" placeholder="请输入合同金额">
+                        </div>
+                    </div>
+                `;
+            } else if (caseType === 'tort') {
+                questionsHtml = `
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">1</span>
+                            侵权类型
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="tortType" value="traffic" class="option-radio">
+                                <div class="option-text">交通事故</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="tortType" value="personal" class="option-radio">
+                                <div class="option-text">人身伤害</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="tortType" value="property" class="option-radio">
+                                <div class="option-text">财产损害</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="tortType" value="reputation" class="option-radio">
+                                <div class="option-text">名誉侵权</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">2</span>
+                            事故时间
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">事故发生日期</label>
+                            <input type="date" class="form-input" id="tortDate">
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">3</span>
+                            损失情况
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">预估损失金额(元)</label>
+                            <input type="number" class="form-input" id="tortAmount" placeholder="请输入预估损失">
+                        </div>
+                    </div>
+                `;
+            } else if (caseType === 'lease') {
+                questionsHtml = `
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">1</span>
+                            争议类型
+                        </div>
+                        <div class="question-options">
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="leaseDispute" value="rent" class="option-radio">
+                                <div class="option-text">租金纠纷</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="leaseDispute" value="deposit" class="option-radio">
+                                <div class="option-text">押金纠纷</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="leaseDispute" value="utilities" class="option-radio">
+                                <div class="option-text">水电费纠纷</div>
+                            </div>
+                            <div class="option-item" onclick="selectOption(this)">
+                                <input type="radio" name="leaseDispute" value="early" class="option-radio">
+                                <div class="option-text">提前退租</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">2</span>
+                            租赁时间
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">起租日期</label>
+                                <input type="date" class="form-input" id="leaseStartDate">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">合同到期日期</label>
+                                <input type="date" class="form-input" id="leaseEndDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <div class="question-label">
+                            <span class="question-number">3</span>
+                            涉及金额
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">涉及金额(元)</label>
+                            <input type="number" class="form-input" id="leaseAmount" placeholder="请输入涉及金额">
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 添加搜索按钮
+            questionsHtml += `
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="performSearch()" style="padding: 1rem 3rem; font-size: 1.1rem;">
+                        🔍 开始检索相似案例
+                    </button>
+                </div>
+            `;
+
+            dynamicQuestions.innerHTML = questionsHtml;
+        }
+
+        // 选择选项
+        function selectOption(element) {
+            const radio = element.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                
+                // 更新选中样式
+                const options = element.parentElement.querySelectorAll('.option-item');
+                options.forEach(opt => opt.classList.remove('selected'));
+                element.classList.add('selected');
+            }
+        }
+
+        // 执行搜索
+        function performSearch() {
+            const caseType = document.getElementById('caseTypeSelect').value;
+            if (!caseType) {
+                showToast('请先选择案件类型');
+                return;
+            }
+
+            // 隐藏引导区域,显示搜索结果
+            document.getElementById('guideSection').style.display = 'none';
+            document.getElementById('searchResults').style.display = 'block';
+
+            // 生成模拟搜索结果
+            const results = generateSearchResults(caseType);
+            displaySearchResults(results);
+        }
+
+        // 重置搜索
+        function resetSearch() {
+            document.getElementById('caseTypeSelect').value = '';
+            document.getElementById('dynamicQuestions').innerHTML = '';
+            document.getElementById('guideSection').style.display = 'block';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        // 显示面板
+        function showPanel(step) {
+            // 更新进度条
+            document.querySelectorAll('.progress-step').forEach(s => {
+                const stepNum = parseInt(s.dataset.step);
+                if (stepNum < step) {
+                    s.classList.add('completed');
+                    s.classList.remove('active');
+                } else if (stepNum === step) {
+                    s.classList.add('active');
+                    s.classList.remove('completed');
+                } else {
+                    s.classList.remove('active', 'completed');
+                }
+            });
+
+            // 显示对应面板
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`panel${step}`).classList.add('active');
+        }
+
+        // 显示提示
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // 生成搜索结果
+        function generateSearchResults(caseType) {
+            const mockCases = {
+                loan: [
+                    { title: '民间借贷纠纷 - 银行转账追索案', court: '北京市朝阳区人民法院', date: '2025-12-15', amount: '50万元', result: '胜诉' },
+                    { title: '民间借贷纠纷 - 借条证据不足案', court: '上海市浦东新区人民法院', date: '2025-11-20', amount: '20万元', result: '部分胜诉' },
+                    { title: '民间借贷纠纷 - 微信转账借款案', court: '广州市天河区人民法院', date: '2025-10-08', amount: '10万元', result: '胜诉' }
+                ],
+                labor: [
+                    { title: '劳动争议 - 拖欠工资案', court: '深圳市南山区人民法院', date: '2025-09-25', amount: '15万元', result: '胜诉' },
+                    { title: '劳动争议 - 加班费纠纷案', court: '杭州市西湖区人民法院', date: '2025-08-10', amount: '8万元', result: '胜诉' },
+                    { title: '劳动争议 - 违法解除劳动合同案', court: '成都市武侯区人民法院', date: '2025-07-05', amount: '25万元', result: '胜诉' }
+                ],
+                contract: [
+                    { title: '买卖合同纠纷 - 货款支付案', court: '武汉市江岸区人民法院', date: '2025-06-18', amount: '100万元', result: '胜诉' },
+                    { title: '服务合同纠纷 - 服务质量纠纷案', court: '南京市鼓楼区人民法院', date: '2025-05-30', amount: '30万元', result: '部分胜诉' }
+                ],
+                tort: [
+                    { title: '侵权责任纠纷 - 交通事故损害赔偿案', court: '西安市雁塔区人民法院', date: '2025-04-22', amount: '40万元', result: '胜诉' },
+                    { title: '侵权责任纠纷 - 人身伤害赔偿案', court: '重庆市渝中区人民法院', date: '2025-03-15', amount: '35万元', result: '胜诉' }
+                ],
+                lease: [
+                    { title: '房屋租赁合同纠纷 - 租金支付案', court: '天津市河西区人民法院', date: '2025-02-28', amount: '5万元', result: '胜诉' },
+                    { title: '房屋租赁合同纠纷 - 押金退还案', court: '青岛市市南区人民法院', date: '2025-01-10', amount: '2万元', result: '胜诉' }
+                ]
+            };
+
+            return mockCases[caseType] || [];
+        }
+
+        // 显示搜索结果
+        function displaySearchResults(results) {
+            const caseList = document.getElementById('caseList');
+            const resultCount = document.getElementById('resultCount');
+            
+            resultCount.textContent = `找到 ${results.length} 个相似案例`;
+            
+            let html = '';
+            results.forEach(item => {
+                const resultClass = item.result === '胜诉' ? 'color: var(--success-color);' : 'color: var(--warning-color);';
+                html += `
+                    <div class="case-item">
+                        <div class="case-title">${item.title}</div>
+                        <div class="case-meta">
+                            <span class="tag">${item.court}</span>
+                            <span>${item.date}</span>
+                            <span>涉及金额: ${item.amount}</span>
+                            <span style="${resultClass} font-weight: 600;">${item.result}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            caseList.innerHTML = html;
+        }
+    </script>
 </body>
 </html>
